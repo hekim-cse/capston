@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:your_app_name/utils/icon_util.dart';
-import 'package:your_app_name/view/scenario_select_screen.dart';
 import '../data/selected_target_store.dart';
 import '../data/user_profile_store.dart';
 import '../model/available_scenarios.dart';
 import '../utils/icon_util.dart';
 import 'main_tab_scaffold.dart';
+import 'scenario_select_screen.dart'; // ← 같은 폴더(view)에 있다면 이 경로가 맞음
 
 class ProfilePickScreen extends StatefulWidget {
   /// 프로필 탭에서 수정하러 들어온 경우: true(기본) → 저장 후 pop
@@ -72,13 +71,10 @@ class _ProfilePickScreenState extends State<ProfilePickScreen> {
         MaterialPageRoute(
           builder: (_) => ScenarioSelectScreen(
             onTargetsConfirmed: (targets) {
-              // 선택 저장
               SelectedTargetStore.setTargets(targets);
-
-              // ✅ 캡처한 NavigatorState(nav)를 사용해서 메인으로 이동 (context 언마운트 에러 방지)
               nav.pushAndRemoveUntil(
                 MaterialPageRoute(builder: (_) => const MainTabScreen()),
-                (route) => false,
+                    (route) => false,
               );
             },
           ),
