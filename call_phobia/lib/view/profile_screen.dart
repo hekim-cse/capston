@@ -109,7 +109,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       '프로필이 변경되었습니다',
                                     style: TextStyle(
                                       fontFamily: 'nanum_b',
-                                      color: _blue,
                                       fontSize: 12.5,
                                     ),
                                   )),
