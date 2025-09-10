@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
-import 'package:your_app_name/view/profile_pick_screen.dart';
+import '../view/profile_pick_screen.dart';
 import '../data/user_profile_store.dart';
-import '../main.dart';
 
 enum _IntroStep { logo, slogan, login }
 
@@ -197,7 +196,7 @@ class _IntroFlowScreenState extends State<IntroFlowScreen>
       if (!mounted) return;
       // ✅ 프로필 이미지 선택 화면으로
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const ProfilePickScreen()),
+        MaterialPageRoute(builder: (_) => const ProfilePickScreen(fromProfile: false)),
       );
     } catch (e) {
       if (!mounted) return;

@@ -1,16 +1,19 @@
-// 📁 lib/view/profile_screen.dart
 import 'package:flutter/material.dart';
 import '../data/user_profile_store.dart';
-import 'profile_pick_screen.dart';
 import '../data/selected_target_store.dart';
 import '../model/available_scenarios.dart';
 import '../utils/icon_util.dart';
+import 'profile_pick_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   final List<String> selectedTargets;
-
   const ProfileScreen({super.key, required this.selectedTargets});
 
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
   static const _sky   = Color(0xFFE6F1FB);
   static const _line  = Color(0xFFB7D5F3);
   static const _blue  = Color(0xFF60B5FF);
@@ -19,13 +22,11 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final nick = UserProfileStore.I.nickname ?? '사용자';
+    final nick  = UserProfileStore.I.nickname ?? '사용자';
     final asset = UserProfileStore.I.selectedAsset ?? 'assets/profile/p1.png';
 
     return Scaffold(
       backgroundColor: Colors.white,
-
-      // 기존처럼 전체 블록을 약간 아래로 내리고 싶으면 margin 유지
       body: Container(
         margin: const EdgeInsets.only(top: 120, right: 1),
         child: SingleChildScrollView(
@@ -33,7 +34,7 @@ class ProfileScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ================== 프로필 카드만 가로 중앙 정렬 ==================
+              // ===== 프로필 카드(가운데 정렬) =====
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -95,16 +96,21 @@ class ProfileScreen extends StatelessWidget {
                           top: -10,
                           left: 12,
                           child: GestureDetector(
-                            onTap: () {
-                              Navigator.of(context).push(
+                            onTap: () async {
+                              final changed = await Navigator.of(context).push<bool>(
                                 MaterialPageRoute(
-                                  builder: (_) => const ProfilePickScreen(),
+                                  builder: (_) => const ProfilePickScreen(fromProfile: true),
                                 ),
                               );
+                              if (changed == true && mounted) {
+                                setState(() {});
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('프로필이 변경되었습니다')),
+                                );
+                              }
                             },
                             child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
                                 color: _sky,
                                 borderRadius: BorderRadius.circular(12),
@@ -126,12 +132,10 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              // ===========================================================
 
               const SizedBox(height: 24),
 
-              // ===== 내가 선택한 대화 상황 (이하는 그대로 유지) =====
-              // 📦 프로필 화면의 '내가 선택한 대화 상황' 부분 교체
+              // ===== 내가 선택한 대화 상황 =====
               const Text('🙋‍♀️ 내가 선택한 대화 상황',
                   style: TextStyle(fontSize: 18, fontFamily: 'nanum_eb')),
               const SizedBox(height: 14),
@@ -140,8 +144,10 @@ class ProfileScreen extends StatelessWidget {
                 valueListenable: SelectedTargetStore.notifier,
                 builder: (context, selected, _) {
                   if (selected.isEmpty) {
-                    return const Text('선택된 상황이 없습니다.',
-                        style: TextStyle(fontSize: 16, color: Colors.grey, fontFamily: 'nanum_b'));
+                    return const Text(
+                      '선택된 상황이 없습니다.',
+                      style: TextStyle(fontSize: 16, color: Colors.grey, fontFamily: 'nanum_b'),
+                    );
                   }
                   return Wrap(
                     spacing: 10,
@@ -157,10 +163,10 @@ class ProfileScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: 24),
-              // ===== 설정 타일 (AI/전화 제거하고 ‘상황 재설정’만) =====
-              _ScenarioResetTile(
+
+              // ===== 상황 재설정 =====
+              ScenarioResetTile(
                 onSaved: () {
-                  // 저장 이후 화면에 알림만 주고 끝 (필요하면 setState 있는 부모라면 새로고침 로직 추가)
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('상황이 업데이트되었습니다')),
                   );
@@ -174,71 +180,32 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
-class _SettingTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final VoidCallback onTap;
-
-  const _SettingTile({
-    required this.icon,
-    required this.title,
-    required this.onTap,
-  });
-
-  static const _tileBg = Color(0xFFE6F1FB);
-  static const _tileText = Color(0xFF27667B);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: _tileBg,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: ListTile(
-        onTap: onTap,
-        leading: Icon(icon, color: _tileText, size: 26),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontFamily: 'nanum_eb',
-            fontSize: 16,
-            color: _tileText,
-          ),
-        ),
-        trailing: const Icon(Icons.expand_more_rounded, color: _tileText),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      ),
-    );
-  }
-}
-
-class _ScenarioResetTile extends StatefulWidget {
+// ------------------------------
+// Scenario reset tile (inline)
+// ------------------------------
+class ScenarioResetTile extends StatefulWidget {
   final VoidCallback? onSaved;
-  const _ScenarioResetTile({this.onSaved});
+  const ScenarioResetTile({super.key, this.onSaved});
 
   @override
-  State<_ScenarioResetTile> createState() => _ScenarioResetTileState();
+  State<ScenarioResetTile> createState() => _ScenarioResetTileState();
 }
 
-class _ScenarioResetTileState extends State<_ScenarioResetTile> {
-  // 색상
+class _ScenarioResetTileState extends State<ScenarioResetTile> {
   static const _tileBg   = Color(0xFFE6F1FB);
   static const _tileText = Color(0xFF27667B);
   static const _orange   = Color(0xFFFF9149);
-  static const _beige    = Color(0xFFFFF1E6); // 부드러운 베이지
+  static const _beige    = Color(0xFFFFF1E6);
 
-  bool _expanded = true;
+  bool _expanded = false;
 
-  late final List<String> _allCategories;     // 전체 카테고리
-  late Set<String> _working;                  // 현재 편집 중 선택값
-  late Set<String> _original;                 // 원본(비교용)
+  late final List<String> _allCategories;
+  late Set<String> _working;
+  late Set<String> _original;
 
   @override
   void initState() {
     super.initState();
-    // availableScenarioGroups에서 카테고리 추출
     _allCategories = availableScenarioGroups.map((g) => g.category).toList();
     _original = Set<String>.from(SelectedTargetStore.targets);
     _working  = Set<String>.from(_original);
@@ -256,7 +223,6 @@ class _ScenarioResetTileState extends State<_ScenarioResetTile> {
       ),
       child: Column(
         children: [
-          // 헤더
           ListTile(
             onTap: () => setState(() => _expanded = !_expanded),
             leading: const Icon(Icons.settings_suggest_rounded, color: _tileText, size: 26),
@@ -271,7 +237,6 @@ class _ScenarioResetTileState extends State<_ScenarioResetTile> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           ),
 
-          // 컨텐츠
           if (_expanded)
             Container(
               width: double.infinity,
@@ -283,7 +248,6 @@ class _ScenarioResetTileState extends State<_ScenarioResetTile> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // 카테고리 버튼들 (3열 그리드 느낌의 Wrap)
                   Wrap(
                     spacing: 10,
                     runSpacing: 10,
@@ -308,7 +272,6 @@ class _ScenarioResetTileState extends State<_ScenarioResetTile> {
 
                   const SizedBox(height: 16),
 
-                  // 하단 액션
                   Row(
                     children: [
                       Expanded(
@@ -348,11 +311,8 @@ class _ScenarioResetTileState extends State<_ScenarioResetTile> {
   }
 
   Future<void> _save() async {
-    // 저장
     SelectedTargetStore.setTargets(_working.toList());
-    // 원본 갱신
     setState(() => _original = Set<String>.from(_working));
-    // 알림/콜백
     widget.onSaved?.call();
   }
 
@@ -365,7 +325,6 @@ class _ScenarioResetTileState extends State<_ScenarioResetTile> {
   }
 }
 
-// 한 개의 둥근 알약 버튼
 class _ScenarioPill extends StatelessWidget {
   final String label;
   final IconData icon;
