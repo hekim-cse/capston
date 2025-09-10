@@ -28,7 +28,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Container(
-        margin: const EdgeInsets.only(top: 120, right: 1),
+        margin: const EdgeInsets.only(top: 100, right: 1),
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 30, 20, 28),
           child: Column(
@@ -105,7 +105,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               if (changed == true && mounted) {
                                 setState(() {});
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('프로필이 변경되었습니다')),
+                                  const SnackBar(content: Text(
+                                      '프로필이 변경되었습니다',
+                                    style: TextStyle(
+                                      fontFamily: 'nanum_b',
+                                      color: _blue,
+                                      fontSize: 12.5,
+                                    ),
+                                  )),
                                 );
                               }
                             },
@@ -133,7 +140,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 50),
 
               // ===== 내가 선택한 대화 상황 =====
               const Text('🙋‍♀️ 내가 선택한 대화 상황',
@@ -168,7 +175,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ScenarioResetTile(
                 onSaved: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('상황이 업데이트되었습니다')),
+                    const SnackBar(content: Text(
+                        '상황이 업데이트되었습니다',
+                      style: TextStyle(
+                        fontFamily: 'nanum_b',
+                        fontSize: 12.5,
+                      ),
+                    )),
                   );
                 },
               ),
@@ -278,9 +291,28 @@ class _ScenarioResetTileState extends State<ScenarioResetTile> {
                         child: OutlinedButton(
                           onPressed: _hasChanges ? _resetToOriginal : null,
                           style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: _tileText),
+                            side: const BorderSide(color: _tileText), // 기본 테두리
+                          ).copyWith(
+                            foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+                              if (states.contains(MaterialState.disabled)) {
+                                return Colors.grey; // 비활성 상태 텍스트 색
+                              }
+                              return Color(0xFF4BA2F0); // 활성 상태 텍스트 색
+                            }),
+                            side: MaterialStateProperty.resolveWith<BorderSide?>((states) {
+                              if (states.contains(MaterialState.disabled)) {
+                                return const BorderSide(color: Colors.grey, width: 1.0);
+                              }
+                              return const BorderSide(color: Color(0xFF4BA2F0), width: 1.1);
+                            }),
                           ),
-                          child: const Text('취소', style: TextStyle(color: _tileText)),
+                          child: const Text(
+                            '취소',
+                            style: TextStyle(
+                              fontFamily: 'nanum_eb',
+                              fontSize: 14,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -291,7 +323,13 @@ class _ScenarioResetTileState extends State<ScenarioResetTile> {
                             backgroundColor: _orange,
                             foregroundColor: Colors.white,
                           ),
-                          child: const Text('수정 완료'),
+                          child: const Text(
+                              '수정 완료',
+                            style: TextStyle(
+                              fontFamily: 'nanum_eb',
+                              fontSize: 14,
+                            ),
+                          ),
                         ),
                       ),
                     ],
