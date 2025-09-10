@@ -1,9 +1,10 @@
 // 📁 lib/view/main_tab_screen.dart
-import 'home_tab_navigator.dart';
 import 'package:flutter/material.dart';
+
+import 'home_tab_navigator.dart';
 import 'stats_screen.dart';
+// ⬇️ 별칭으로 임포트
 import 'profile_screen.dart';
-import '../data/selected_target_store.dart';
 
 class MainTabScreen extends StatefulWidget {
   const MainTabScreen({super.key});
@@ -13,24 +14,33 @@ class MainTabScreen extends StatefulWidget {
 }
 
 class _MainTabScreenState extends State<MainTabScreen> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 1; // 홈 탭을 기본으로 보고 싶다면 1
+
+  List<Widget> get _pages => const [
+    StatsScreen(),
+    HomeTabNavigator(),
+    // ⬆️ 두 개는 const 생성자 가능
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
+        // ⬇️ 세 번째 페이지는 selectedTargets를 전달해야 하므로 별도로 빌드
         children: [
-          const StatsScreen(),
-          const HomeTabNavigator(),
-          ProfileScreen(selectedTargets: const []), // 쓰지 않음, 내부에서 Store를 참조
+          _pages[0],
+          _pages[1],
+          // 별칭으로 명시 + 파라미터 전달
+          ProfileScreen(selectedTargets: const []),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white, // ← 흰색 배경
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white,
         currentIndex: _selectedIndex,
-        selectedItemColor: Color(0xFF60B5FF),      // 🔥 선택된 아이템 색상 (보라색 대신 파란색 예시)
-        unselectedItemColor: Color(0xFFBFBFBF),   // 🔥 선택되지 않은 아이템 색상
+        selectedItemColor: const Color(0xFF60B5FF),
+        unselectedItemColor: const Color(0xFFBFBFBF),
         onTap: (i) => setState(() => _selectedIndex = i),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: '통계'),
