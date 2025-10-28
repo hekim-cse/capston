@@ -1,0 +1,8 @@
+{
+  "timestamp": "2025-10-28T17:00:00",
+  "risk_within_3h_percent": 0.6,
+  "eta_next_risk_hours": 52.4,
+  "expected_risk_time_next_24h_hours": 0.8,
+  "temperature_celsius": 11.0,
+  "humidity_percent": 71.5
+}
